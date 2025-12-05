@@ -1,0 +1,64 @@
+/* Dark Theme Variables */
+:root {
+  --bg-dark: #111827;
+  --card-dark: #1F2937;
+  --text-main: #F3F4F6;
+  --text-muted: #9CA3AF;
+  --accent-red: #DC2626;
+  --accent-red-hover: #B91C1C;
+  --input-bg: #111827; /* Darker than card */
+  --border: #374151;
+}
+
+.login-page {
+  height: 100vh;
+  background: linear-gradient(135deg, #374151 0%, #111827 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.shield-logo {
+  width: 60px; height: 60px; background: var(--accent-red);
+  mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>') no-repeat center;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>') no-repeat center;
+  margin-bottom: 20px;
+}
+
+.login-card {
+  background: var(--card-dark);
+  padding: 2.5rem;
+  border-radius: 12px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+}
+
+.login-card h2 { color: var(--text-main); margin-bottom: 0.5rem; }
+.login-card p { color: var(--text-muted); margin-bottom: 2rem; }
+
+.input-group { margin-bottom: 1.5rem; }
+.input-group label { display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.9rem; }
+.input-group input {
+  width: 100%; padding: 12px; border-radius: 8px;
+  background: var(--input-bg); border: 1px solid var(--border);
+  color: white; font-size: 1rem; box-sizing: border-box;
+}
+.input-group input:focus { border-color: #3B82F6; outline: none; }
+
+.login-btn {
+  width: 100%; padding: 12px; background: var(--accent-red);
+  color: white; border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: bold; cursor: pointer;
+  transition: background 0.2s;
+}
+.login-btn:hover { background: var(--accent-red-hover); }
+
+.quick-access { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.qa-btn {
+  background: var(--input-bg); border: 1px solid var(--border);
+  color: var(--text-muted); padding: 8px; border-radius: 6px;
+  cursor: pointer; margin-right: 10px; font-size: 0.85rem;
+}
