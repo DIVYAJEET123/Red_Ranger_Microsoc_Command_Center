@@ -16,7 +16,6 @@ const Dashboard = () => {
             const json = await res.json();
             setData(json);
 
-            // Fetch Admin Stats if user is Admin
             if (user.role === 'Admin') {
                 const statsRes = await fetch('http://localhost:5000/api/admin/analyst-performance');
                 const statsJson = await statsRes.json();
@@ -27,19 +26,14 @@ const Dashboard = () => {
         }
     };
 
-    // --- FIX: ROBUST RESOLVE FUNCTION ---
     const resolveIncident = async (id) => {
         try {
-            console.log(`Attempting to resolve incident ${id} by user ${user.id}`);
-            
             const res = await fetch(`http://localhost:5000/api/incidents/${id}/resolve`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user.id }) 
             });
-
             const result = await res.json();
-            
             if (result.success) {
                 fetchData(); 
             } else {
@@ -47,14 +41,11 @@ const Dashboard = () => {
             }
         } catch (error) {
             console.error("Error resolving incident:", error);
-            alert("Network Error: Could not resolve incident.");
         }
     };
 
     useEffect(() => {
         fetchData();
-
-        // WebSocket Connection
         const newSocket = io('http://localhost:5000');
         setSocket(newSocket);
 
@@ -66,21 +57,17 @@ const Dashboard = () => {
             setData(prev => ({ ...prev, incidents: [incident, ...prev.incidents] }));
         });
 
-        newSocket.on('refresh_data', () => {
-            fetchData(); 
-        });
+        newSocket.on('refresh_data', () => fetchData());
 
         return () => newSocket.disconnect();
     }, [user]);
 
-    // Calculate max score for progress bars
     const maxScore = adminStats.reduce((max, stat) => Math.max(max, stat.resolvedCount), 1);
 
     return (
         <div className="dash-container">
-            {/* === UPGRADED HOLOGRAPHIC HEADER === */}
+            {/* Header Section */}
             <header className="command-header">
-                {/* Left: Branding & System Status */}
                 <div className="brand-section">
                     <div className="power-coin">⚡</div>
                     <div className="title-stack">
@@ -92,10 +79,8 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Right: Operator ID & Controls */}
                 <div className="controls-section">
                     <div className="operator-badge">
-                        {/* Dynamic Avatar Ring based on Role */}
                         <div className={`avatar-ring ${user.role}`}>
                             {user.name.charAt(0).toUpperCase()}
                         </div>
@@ -106,9 +91,7 @@ const Dashboard = () => {
                             </span>
                         </div>
                     </div>
-
                     <div className="divider-vertical"></div>
-
                     <button onClick={logout} className="disconnect-btn">
                         <span className="btn-icon">⏻</span>
                         <span className="btn-text">DISCONNECT</span>
@@ -116,7 +99,7 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            {/* === ADMIN PANEL === */}
+            {/* Admin Panel */}
             {user.role === 'Admin' && (
                 <div className="admin-section">
                     <h3 className="section-title">🛡️ RANGER PERFORMANCE METRICS</h3>
@@ -142,10 +125,7 @@ const Dashboard = () => {
                                     <span className="stat-value">{stat.resolvedCount}</span>
                                 </div>
                                 <div className="progress-bg">
-                                    <div 
-                                        className="progress-fill" 
-                                        style={{width: `${(stat.resolvedCount / maxScore) * 100}%`}}
-                                    ></div>
+                                    <div className="progress-fill" style={{width: `${(stat.resolvedCount / maxScore) * 100}%`}}></div>
                                 </div>
                             </div>
                         ))}
@@ -153,23 +133,34 @@ const Dashboard = () => {
                 </div>
             )}
 
+            {/* Main Grid */}
             <div className="main-grid">
-                {/* Live Log Stream */}
+                {/* Log Panel */}
                 <div className="panel log-panel">
                     <h3>🌐 LIVE NEURAL NETWORK FEED</h3>
                     <div className="table-wrapper">
                         <table>
                             <thead>
-                                <tr><th>TIME</th><th>ORIGIN</th><th>THREAT LEVEL</th><th>VECTOR</th><th>STATUS</th></tr>
+                                <tr>
+                                    <th>TIME</th>
+                                    <th>ORIGIN</th> {/* Merged Header */}
+                                    <th>THREAT LEVEL</th>
+                                    <th>VECTOR</th>
+                                    <th>STATUS</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {data.logs.map(log => (
                                     <tr key={log._id} className={log.severity === 'Critical' ? 'row-crit' : ''}>
                                         <td className="mono">{new Date(log.timestamp).toLocaleTimeString()}</td>
+                                        
+                                        {/* --- UPDATED CELL: COUNTRY : IP --- */}
                                         <td>
                                             <span className="country-code">{log.country}</span>
+                                            <span className="separator"> : </span>
                                             <span className="ip-addr">{log.sourceIP}</span>
                                         </td>
+
                                         <td>
                                             <div className="threat-bar-container">
                                                 <div 
@@ -190,7 +181,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Incident Management */}
+                {/* Incident Panel */}
                 <div className="panel incident-panel">
                     <h3>⚠️ ACTIVE THREATS</h3>
                     <div className="incident-list">
@@ -207,12 +198,8 @@ const Dashboard = () => {
                                         <span className={`status-dot ${inc.status}`}></span>
                                     </div>
                                     <p className="incident-desc">{inc.description}</p>
-                                    
                                     {inc.status !== 'Resolved' ? (
-                                        <button 
-                                            className="resolve-btn" 
-                                            onClick={() => resolveIncident(inc._id)}
-                                        >
+                                        <button className="resolve-btn" onClick={() => resolveIncident(inc._id)}>
                                             INITIATE PROTOCOL
                                         </button>
                                     ) : (
