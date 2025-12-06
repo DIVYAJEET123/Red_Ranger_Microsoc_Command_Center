@@ -1,64 +1,221 @@
-/* Dark Theme Variables */
-:root {
-  --bg-dark: #111827;
-  --card-dark: #1F2937;
-  --text-main: #F3F4F6;
-  --text-muted: #9CA3AF;
-  --accent-red: #DC2626;
-  --accent-red-hover: #B91C1C;
-  --input-bg: #111827; /* Darker than card */
-  --border: #374151;
+/* --- GLOBAL LAYOUT --- */
+.login-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #050505; /* Deep Space Black */
+    position: relative;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.login-page {
-  height: 100vh;
-  background: linear-gradient(135deg, #374151 0%, #111827 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Segoe UI', sans-serif;
+/* --- ANIMATED GRID BACKGROUND (The Morphin Grid) --- */
+.grid-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    /* Creates a perspective grid using gradients */
+    background-image: 
+        linear-gradient(rgba(220, 38, 38, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(220, 38, 38, 0.2) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    animation: gridMove 20s linear infinite;
+    z-index: 0;
 }
 
-.shield-logo {
-  width: 60px; height: 60px; background: var(--accent-red);
-  mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>') no-repeat center;
-  -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>') no-repeat center;
-  margin-bottom: 20px;
+@keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
 }
 
-.login-card {
-  background: var(--card-dark);
-  padding: 2.5rem;
-  border-radius: 12px;
-  width: 100%; max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  border: 1px solid var(--border);
+/* --- RED LASER SCANNER --- */
+.scan-line {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 3px;
+    background: #DC2626; /* Red Ranger Color */
+    box-shadow: 0 0 15px #DC2626;
+    animation: scan 6s ease-in-out infinite;
+    z-index: 1;
+    opacity: 0.6;
+    pointer-events: none;
 }
 
-.login-card h2 { color: var(--text-main); margin-bottom: 0.5rem; }
-.login-card p { color: var(--text-muted); margin-bottom: 2rem; }
+@keyframes scan {
+    0% { top: -10%; }
+    50% { top: 110%; }
+    100% { top: -10%; }
+}
 
-.input-group { margin-bottom: 1.5rem; }
-.input-group label { display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.9rem; }
+/* --- TERMINAL CARD --- */
+.login-terminal {
+    background: rgba(15, 23, 42, 0.9); /* Dark Blue/Grey Slate */
+    padding: 40px;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    border-top: 4px solid #DC2626; /* Top Red Accent */
+    box-shadow: 0 0 50px rgba(220, 38, 38, 0.15);
+    width: 100%;
+    max-width: 380px;
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(12px);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 20px;
+}
+
+/* The Power Coin Logo */
+.ranger-coin {
+    width: 48px; height: 48px;
+    background: radial-gradient(circle at 30% 30%, #EF4444, #7f1d1d);
+    border-radius: 50%;
+    border: 2px solid #FCD34D; /* Gold Border */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.4rem;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
+    text-shadow: 0 0 5px white;
+}
+
+.terminal-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.sub-text {
+    color: #94A3B8;
+    font-size: 0.75rem;
+    margin: 4px 0 0 0;
+    letter-spacing: 1px;
+}
+
+.blink { color: #10B981; animation: blinker 2s infinite; font-weight: bold; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+/* --- INPUTS --- */
+.input-group { margin-bottom: 25px; position: relative; }
+
+.input-group label {
+    display: block;
+    color: #FCD34D; /* Gold Text */
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 1.5px;
+}
+
 .input-group input {
-  width: 100%; padding: 12px; border-radius: 8px;
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: white; font-size: 1rem; box-sizing: border-box;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #334155;
+    border-radius: 4px;
+    color: white;
+    padding: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+    box-sizing: border-box; /* Fixes padding width issues */
 }
-.input-group input:focus { border-color: #3B82F6; outline: none; }
 
-.login-btn {
-  width: 100%; padding: 12px; background: var(--accent-red);
-  color: white; border: none; border-radius: 8px;
-  font-size: 1rem; font-weight: bold; cursor: pointer;
-  transition: background 0.2s;
+.input-group input:focus {
+    border-color: #DC2626;
+    background: rgba(220, 38, 38, 0.05);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
 }
-.login-btn:hover { background: var(--accent-red-hover); }
 
-.quick-access { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-.qa-btn {
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: var(--text-muted); padding: 8px; border-radius: 6px;
-  cursor: pointer; margin-right: 10px; font-size: 0.85rem;
+/* Animated bar under input */
+.input-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0%; height: 2px;
+    background: #DC2626;
+    transition: 0.4s ease-out;
+    margin-bottom: 1px; /* Align with input border */
 }
+.input-group input:focus ~ .input-bar { width: 100%; }
+
+/* --- ERROR & BUTTON --- */
+.error-msg {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    border-left: 3px solid #EF4444;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.morph-btn {
+    width: 100%;
+    padding: 14px;
+    /* Red Gradient Background */
+    background: linear-gradient(135deg, #B91C1C 0%, #EF4444 100%);
+    color: white;
+    border: none;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    /* Angled "Sci-Fi" Shape */
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.morph-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.5);
+    background: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);
+}
+
+.morph-btn:disabled {
+    background: #334155;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* --- QUICK ACCESS --- */
+.quick-access-panel {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #334155;
+    text-align: center;
+}
+
+.quick-access-panel p { color: #64748B; font-size: 0.75rem; margin-bottom: 12px; }
+
+.qa-buttons { display: flex; gap: 10px; justify-content: center; }
+
+.qa-key {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #94A3B8;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.qa-key:hover { color: white; border-color: white; }
+.qa-key.red:hover { background: rgba(220, 38, 38, 0.2); border-color: #EF4444; color: #EF4444; }
+.qa-key.blue:hover { background: rgba(59, 130, 246, 0.2); border-color: #3B82F6; color: #3B82F6; }

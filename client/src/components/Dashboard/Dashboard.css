@@ -22,35 +22,102 @@ body {
     margin: 0 auto;
 }
 
-/* --- HEADER --- */
-.dash-header {
+/* --- NEW HOLOGRAPHIC COMMAND HEADER --- */
+.command-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: rgba(30, 41, 59, 0.7); /* Glassmorphism */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #334155;
+    padding: 15px 25px;
     margin-bottom: 30px;
-    border-bottom: 2px solid var(--panel-bg);
-    padding-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    border-top: 2px solid var(--accent-blue);
 }
 
-.header-left { display: flex; align-items: center; gap: 15px; }
-.ranger-logo { font-size: 2.5rem; }
-.dash-header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
-.status-text { margin: 0; color: var(--text-secondary); font-size: 0.8rem; }
-.blink { color: var(--accent-green); animation: blinker 1.5s linear infinite; }
-@keyframes blinker { 50% { opacity: 0; } }
+/* Left Branding */
+.brand-section { display: flex; align-items: center; gap: 15px; }
 
-.logout-btn {
-    background: var(--accent-red);
-    color: white;
-    border: none;
+.power-coin {
+    width: 45px; height: 45px;
+    background: radial-gradient(circle, #EF4444, #991B1B);
+    border: 2px solid #FCD34D;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: white;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+    animation: pulse 3s infinite;
+}
+
+.title-stack h1 {
+    margin: 0; font-size: 1.2rem; color: white; letter-spacing: 2px;
+}
+.title-stack .highlight { color: var(--accent-red); }
+
+.sys-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px;
+    font-weight: bold; letter-spacing: 1px;
+}
+.status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 5px var(--accent-green); }
+.blink { animation: blinker 1.5s infinite; }
+
+/* Right Controls */
+.controls-section { display: flex; align-items: center; gap: 20px; }
+
+/* Operator Badge (User Profile) */
+.operator-badge {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 15px 6px 6px;
+    border-radius: 50px;
+    border: 1px solid #334155;
+}
+
+.avatar-ring {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; color: #111;
+    font-size: 1.1rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+.avatar-ring.Admin { background: var(--accent-gold); border: 2px solid white; }
+.avatar-ring.Analyst { background: var(--accent-blue); border: 2px solid white; }
+
+.operator-details { display: flex; flex-direction: column; }
+.op-name { font-weight: bold; font-size: 0.9rem; color: white; }
+.op-role { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.op-role.Admin { color: var(--accent-gold); }
+.op-role.Analyst { color: var(--accent-blue); }
+
+.divider-vertical { width: 1px; height: 30px; background: #334155; }
+
+/* Disconnect Button */
+.disconnect-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    letter-spacing: 1px;
+    font-size: 0.8rem;
+    transition: all 0.3s;
 }
 
-/* --- ADMIN PANEL (NEW) --- */
+.disconnect-btn:hover {
+    background: var(--accent-red);
+    color: white;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+}
+
+.btn-icon { font-size: 1rem; }
+
+/* --- ADMIN PANEL --- */
 .admin-section { margin-bottom: 30px; }
 .section-title { color: var(--accent-gold); border-left: 4px solid var(--accent-gold); padding-left: 10px; }
 
@@ -86,7 +153,6 @@ body {
 }
 
 .operator-info h4 { margin: 0; color: white; }
-.operator-info small { color: var(--accent-blue); text-transform: uppercase; font-size: 0.7rem; }
 .rank-badge { margin-left: auto; background: var(--bg-dark); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-gold); }
 
 .card-stats { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
@@ -158,3 +224,6 @@ td { padding: 10px; border-bottom: 1px solid #334155; }
 .resolved-stamp {
     text-align: center; color: var(--accent-green); font-size: 0.8rem; margin-top: 10px; border: 1px dashed var(--accent-green); padding: 5px;
 }
+
+@keyframes blinker { 50% { opacity: 0; } }
+@keyframes pulse { 0% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); } 50% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.8); } 100% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); } }

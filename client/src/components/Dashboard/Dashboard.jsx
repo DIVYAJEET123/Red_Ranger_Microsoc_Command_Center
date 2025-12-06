@@ -41,7 +41,6 @@ const Dashboard = () => {
             const result = await res.json();
             
             if (result.success) {
-                // FORCE REFRESH: Don't wait for socket
                 fetchData(); 
             } else {
                 alert("Failed to resolve: " + result.message);
@@ -68,7 +67,7 @@ const Dashboard = () => {
         });
 
         newSocket.on('refresh_data', () => {
-            fetchData(); // Syncs everyone else
+            fetchData(); 
         });
 
         return () => newSocket.disconnect();
@@ -79,24 +78,45 @@ const Dashboard = () => {
 
     return (
         <div className="dash-container">
-            <header className="dash-header">
-                <div className="header-left">
-                    <div className="ranger-logo">⚡</div>
-                    <div>
-                        <h1>MICROSOC COMMAND CENTER</h1>
-                        <p className="status-text">SYSTEM STATUS: <span className="blink">ONLINE</span></p>
+            {/* === UPGRADED HOLOGRAPHIC HEADER === */}
+            <header className="command-header">
+                {/* Left: Branding & System Status */}
+                <div className="brand-section">
+                    <div className="power-coin">⚡</div>
+                    <div className="title-stack">
+                        <h1>MICROSOC <span className="highlight">COMMAND</span></h1>
+                        <div className="sys-status">
+                            <span className="status-dot blink"></span>
+                            <span className="status-text">MORPHIN GRID: <span style={{color:'#10B981'}}>STABLE</span></span>
+                        </div>
                     </div>
                 </div>
-                <div className="header-right">
-                    <div className="user-profile">
-                        <span className="user-name">{user.name}</span>
-                        <span className={`user-role role-${user.role}`}>{user.role}</span>
+
+                {/* Right: Operator ID & Controls */}
+                <div className="controls-section">
+                    <div className="operator-badge">
+                        {/* Dynamic Avatar Ring based on Role */}
+                        <div className={`avatar-ring ${user.role}`}>
+                            {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="operator-details">
+                            <span className="op-name">{user.name}</span>
+                            <span className={`op-role ${user.role}`}>
+                                {user.role === 'Admin' ? '★ COMMANDER' : '● RANGER ANALYST'}
+                            </span>
+                        </div>
                     </div>
-                    <button onClick={logout} className="logout-btn">EJECT</button>
+
+                    <div className="divider-vertical"></div>
+
+                    <button onClick={logout} className="disconnect-btn">
+                        <span className="btn-icon">⏻</span>
+                        <span className="btn-text">DISCONNECT</span>
+                    </button>
                 </div>
             </header>
 
-            {/* === UPGRADED ADMIN PANEL === */}
+            {/* === ADMIN PANEL === */}
             {user.role === 'Admin' && (
                 <div className="admin-section">
                     <h3 className="section-title">🛡️ RANGER PERFORMANCE METRICS</h3>
@@ -107,7 +127,6 @@ const Dashboard = () => {
                                     <div className="avatar-circle">{stat.name.charAt(0)}</div>
                                     <div className="operator-info">
                                         <h4>{stat.name}</h4>
-                                        {/* --- UPDATED SECTION START --- */}
                                         <small style={{ 
                                             color: stat.role === 'Admin' ? '#fbbf24' : '#3b82f6',
                                             fontWeight: 'bold',
@@ -115,7 +134,6 @@ const Dashboard = () => {
                                         }}>
                                             {stat.role}
                                         </small>
-                                        {/* --- UPDATED SECTION END --- */}
                                     </div>
                                     <div className="rank-badge">#{adminStats.indexOf(stat) + 1}</div>
                                 </div>
