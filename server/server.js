@@ -1,8 +1,23 @@
 require('dotenv').config();
+
+// --- DEBUGGING START ---
+console.log("------------------------------------------------");
+console.log("DEBUG: Checking API Key...");
+if (!process.env.ABUSEIPDB_KEY) {
+    console.error("❌ ERROR: ABUSEIPDB_KEY is undefined. Check your .env file location!");
+} else {
+    console.log("✅ SUCCESS: API Key loaded. Starts with:", process.env.ABUSEIPDB_KEY.substring(0, 5) + "...");
+}
+console.log("------------------------------------------------");
+// --- DEBUGGING END ---
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const http = require('http'); // Required for Socket.io
+const { Server } = require('socket.io');
+const axios = require('axios'); // For External API calls
 
 // Models
 const User = require('./models/User');
@@ -13,98 +28,153 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- 1. MONGODB CONNECTION ---
+// --- SOCKET.IO SETUP (Real-time Streaming) ---
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] }
+});
+
+// --- MONGODB ---
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected"))
     .catch(err => console.error("❌ DB Error:", err));
 
-// --- 2. SEED USERS (Run once to create accounts) ---
-const seedUsers = async () => {
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-        const salt = await bcrypt.genSalt(10);
-        const adminHash = await bcrypt.hash('admin123', salt);
-        const analystHash = await bcrypt.hash('analyst123', salt);
+// --- ANOMALY DETECTION ENGINE (In-Memory) ---
+// Stores hit timestamps for every IP: { "192.168.1.1": [timestamp1, timestamp2] }
+const trafficWindow = new Map(); 
+const SPIKE_THRESHOLD = 5; // >5 hits triggers alert
+const WINDOW_TIME = 10000; // 10 Seconds
 
-        await new User({ username: 'admin', password: adminHash, role: 'Admin', name: 'Red Ranger' }).save();
-        await new User({ username: 'analyst', password: analystHash, role: 'Analyst', name: 'Alpha 5' }).save();
-        console.log("✅ Default Users Created: admin/admin123 & analyst/analyst123");
+// --- HELPER: REAL THREAT INTEL API ---
+const getThreatData = async (ip) => {
+    // Skip local/private IPs to avoid API errors
+    if (ip.startsWith('192.168') || ip.startsWith('127') || ip === '::1') {
+        return { country: 'Local Network', score: 0 };
+    }
+    try {
+        const res = await axios.get('https://api.abuseipdb.com/api/v2/check', {
+            params: { ipAddress: ip, maxAgeInDays: 90 },
+            headers: { 'Key': process.env.ABUSEIPDB_KEY, 'Accept': 'application/json' }
+        });
+        return {
+            country: res.data.data.countryCode || 'Unknown',
+            score: res.data.data.abuseConfidenceScore || 0
+        };
+    } catch (error) {
+        console.log("⚠️ API Limit or Error:", error.message);
+        return { country: 'Unknown', score: 0 };
     }
 };
-seedUsers();
 
-// --- 3. LOG INGESTION SIMULATOR & THREAT ENGINE ---
-// [cite: 15, 16, 17, 18]
-const ATTACKS = ['XSS', 'SQL Injection', 'Port Scan', 'Failed Login', 'Brute Force'];
-const SYSTEMS = ['Morphin_Grid_Core', 'Zord_Uplink', 'Command_Console', 'Firewall_Node_A'];
-const SEVERITY = ['Low', 'Low', 'Medium', 'High', 'Critical']; // Weighted probabilities
+// --- SIMULATION LOOP WITH REAL DATA ---
+const ATTACKS = ['SQL Injection', 'XSS', 'Brute Force', 'DDoS Probe', 'Port Scan'];
+const SYSTEMS = ['Morphin_Grid', 'Zord_Network', 'Firewall_A'];
 
 setInterval(async () => {
-    // A. Generate Log
-    const randSev = SEVERITY[Math.floor(Math.random() * SEVERITY.length)];
+    // 1. Generate a semi-random IP (Simulating inbound traffic)
+    const octet = Math.floor(Math.random() * 255);
+    const simulatedIP = `118.25.6.${octet}`; // Using public IP ranges to test API
+
+    // 2. Fetch REAL Intelligence
+    const intel = await getThreatData(simulatedIP);
+    
+    // 3. Determine Severity based on Real Threat Score
+    let severity = 'Low';
+    if (intel.score > 80) severity = 'Critical';
+    else if (intel.score > 50) severity = 'High';
+    else if (intel.score > 20) severity = 'Medium';
+
     const newLog = new Log({
         attackType: ATTACKS[Math.floor(Math.random() * ATTACKS.length)],
-        sourceIP: `192.168.1.${Math.floor(Math.random() * 255)}`,
+        sourceIP: simulatedIP,
         targetSystem: SYSTEMS[Math.floor(Math.random() * SYSTEMS.length)],
-        severity: randSev,
+        severity: severity,
+        country: intel.country,
+        threatScore: intel.score,
         timestamp: new Date()
     });
+    
     const savedLog = await newLog.save();
 
-    // B. Threat Classification Engine (Rule-Based) 
-    // Rule: If Severity is Critical or High -> Auto-create Incident
-    if (randSev === 'Critical' || randSev === 'High') {
-        const newIncident = new Incident({
-            originalLogId: savedLog._id,
-            description: `Auto-Escalated: ${savedLog.attackType} on ${savedLog.targetSystem}`,
-            status: 'Open'
-        });
-        await newIncident.save();
+    // 4. Continuous Live Stream -> Emit to Frontend
+    io.emit('new_log', savedLog);
+
+    // 5. Real-time Pattern Detection (Anomaly Spike)
+    const now = Date.now();
+    let hits = trafficWindow.get(simulatedIP) || [];
+    hits = hits.filter(t => now - t < WINDOW_TIME); // Keep only recent hits
+    hits.push(now);
+    trafficWindow.set(simulatedIP, hits);
+
+    if (hits.length > SPIKE_THRESHOLD) {
+        // Create Incident for Anomaly
+        const anomalyDesc = `ANOMALY: High Traffic Spike from ${simulatedIP} (${intel.country})`;
+        const exists = await Incident.findOne({ description: anomalyDesc, status: { $ne: 'Resolved' } });
+        
+        if (!exists) {
+            const inc = await new Incident({ originalLogId: savedLog._id, description: anomalyDesc, status: 'Open' }).save();
+            io.emit('new_incident', inc);
+        }
+    } 
+    // Also create incident for Critical Threat Scores
+    else if (severity === 'Critical') {
+        const desc = `CRITICAL THREAT: Known Malicious IP ${simulatedIP} (Score: ${intel.score})`;
+        const exists = await Incident.findOne({ description: desc, status: { $ne: 'Resolved' } });
+        if(!exists) {
+            const inc = await new Incident({ originalLogId: savedLog._id, description: desc, status: 'Open' }).save();
+            io.emit('new_incident', inc);
+        }
     }
 
-    // C. Cleanup (Keep DB light for demo)
-    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-    await Log.deleteMany({ timestamp: { $lt: tenMinsAgo } });
+}, 4000); // Run every 4 seconds to respect API limits
 
-}, 3000); // Run every 3 seconds
+// --- ROUTES ---
 
-// --- 4. API ROUTES ---
-
-// Auth Route 
+// Login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) return res.status(400).json({ success: false, message: "User not found" });
 
+    // Note: Assuming passwords in DB are hashed. If manual seed, use simple check or bcrypt.
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
-    res.json({ 
-        success: true, 
-        user: { id: user._id, name: user.name, role: user.role, username: user.username } 
-    });
+    res.json({ success: true, user: { id: user._id, name: user.name, role: user.role } });
 });
 
-// Get Stats & Logs for Dashboard [cite: 21, 22]
+// Admin Stats Route (Corrected to include Role)
+app.get('/api/admin/analyst-performance', async (req, res) => {
+    const stats = await Incident.aggregate([
+        { $match: { status: 'Resolved' } },
+        { $group: { _id: "$resolvedBy", count: { $sum: 1 } } },
+        { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $project: { name: "$user.name", role: "$user.role", resolvedCount: "$count" } }
+    ]);
+    res.json(stats);
+});
+
+// Dashboard Data
 app.get('/api/dashboard-data', async (req, res) => {
     const logs = await Log.find().sort({ timestamp: -1 }).limit(50);
     const incidents = await Incident.find().sort({ createdAt: -1 });
-    
-    // Simple Aggregation for "Most Frequent Attacker IP" [cite: 22]
-    const ipStats = await Log.aggregate([
-        { $group: { _id: "$sourceIP", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 1 }
-    ]);
-
-    res.json({ logs, incidents, topAttacker: ipStats[0] || { _id: 'None', count: 0 } });
+    res.json({ logs, incidents });
 });
 
-// Update Incident Status 
-app.put('/api/incidents/:id', async (req, res) => {
-    const { status } = req.body;
-    await Incident.findByIdAndUpdate(req.params.id, { status });
+// Resolve Incident
+app.put('/api/incidents/:id/resolve', async (req, res) => {
+    const { userId } = req.body;
+    await Incident.findByIdAndUpdate(req.params.id, { 
+        status: 'Resolved',
+        resolvedBy: userId,
+        resolvedAt: new Date()
+    });
+    // Notify all clients to refresh
+    io.emit('refresh_data');
     res.json({ success: true });
 });
 
-app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+// Start Server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,13 +1,160 @@
-.dash-container { background: #0F1115; min-height: 100vh; color: #E5E7EB; padding: 20px; }
-.dash-header { display: flex; justify-content: space-between; border-bottom: 2px solid #DC2626; padding-bottom: 20px; margin-bottom: 20px; }
-.grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-.card { background: #161B22; border: 1px solid #30363D; border-radius: 8px; padding: 20px; }
-.card h3 { color: #DC2626; margin-top: 0; border-bottom: 1px solid #30363D; padding-bottom: 10px; }
+:root {
+    --bg-dark: #0f172a;
+    --panel-bg: #1e293b;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --accent-gold: #fbbf24;
+    --accent-red: #ef4444;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+.dash-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* --- HEADER --- */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--panel-bg);
+    padding-bottom: 20px;
+}
+
+.header-left { display: flex; align-items: center; gap: 15px; }
+.ranger-logo { font-size: 2.5rem; }
+.dash-header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+.status-text { margin: 0; color: var(--text-secondary); font-size: 0.8rem; }
+.blink { color: var(--accent-green); animation: blinker 1.5s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+.logout-btn {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* --- ADMIN PANEL (NEW) --- */
+.admin-section { margin-bottom: 30px; }
+.section-title { color: var(--accent-gold); border-left: 4px solid var(--accent-gold); padding-left: 10px; }
+
+.operator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.operator-card {
+    background: linear-gradient(145deg, #1e293b, #253349);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.operator-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    border-color: var(--accent-gold);
+}
+
+.card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.avatar-circle {
+    width: 40px; height: 40px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 1.2rem;
+}
+
+.operator-info h4 { margin: 0; color: white; }
+.operator-info small { color: var(--accent-blue); text-transform: uppercase; font-size: 0.7rem; }
+.rank-badge { margin-left: auto; background: var(--bg-dark); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-gold); }
+
+.card-stats { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+.stat-value { font-weight: bold; color: var(--accent-green); font-size: 1.2rem; }
+
+.progress-bg { height: 6px; background: var(--bg-dark); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent-gold); border-radius: 3px; transition: width 1s ease-out; }
+
+/* --- MAIN GRID --- */
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.panel {
+    background: var(--panel-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* --- LOG TABLE --- */
+.table-wrapper { height: 400px; overflow-y: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-th { text-align: left; color: #6B7280; padding: 10px; border-bottom: 1px solid #30363D; }
-td { padding: 10px; border-bottom: 1px solid #21262D; }
-.badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-.Critical { background: rgba(220, 38, 38, 0.2); color: #EF4444; }
-.High { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-.Low { background: rgba(16, 185, 129, 0.2); color: #10B981; }
-.action-btn { background: #2563EB; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+th { text-align: left; padding: 12px; color: var(--text-secondary); border-bottom: 1px solid #334155; sticky: top; }
+td { padding: 10px; border-bottom: 1px solid #334155; }
+.row-crit { background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--accent-red); }
+
+.threat-bar-container { width: 100px; height: 6px; background: #374151; border-radius: 3px; }
+.threat-fill { height: 100%; border-radius: 3px; }
+
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.badge.Critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+.badge.High { background: rgba(251, 191, 36, 0.2); color: var(--accent-gold); }
+.badge.Medium { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+.badge.Low { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+
+/* --- INCIDENTS --- */
+.all-clear { text-align: center; padding: 50px; color: var(--accent-green); }
+.shield-icon { font-size: 3rem; margin-bottom: 10px; }
+
+.incident-card {
+    background: var(--bg-dark);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+.incident-card.Open { border-left: 4px solid var(--accent-red); }
+
+.incident-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.incident-type { font-weight: bold; color: var(--accent-red); font-size: 0.8rem; letter-spacing: 1px; }
+
+.resolve-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+.resolve-btn:hover { background: var(--accent-red); color: white; }
+
+.resolved-stamp {
+    text-align: center; color: var(--accent-green); font-size: 0.8rem; margin-top: 10px; border: 1px dashed var(--accent-green); padding: 5px;
+}
